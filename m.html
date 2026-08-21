@@ -9,10 +9,16 @@
 <!--
   連結預覽（Open Graph）—— 貼到 IG、LINE、Facebook 時對方看到的卡片。
 
-  **og.png 要跟這一頁放在同一個資料夾**（同一個 GitHub Pages 倉庫）。
+  **圖檔要跟這一頁放在同一個資料夾**（同一個 GitHub Pages 倉庫）。
   網址一定要寫**完整的絕對路徑** —— 抓取器不會自己補網域，寫成
-  "og.png" 的話卡片就沒有圖。圖是 tools/make_og_image.py 產的，
+  "og-2.png" 的話卡片就沒有圖。圖是 tools/make_og_image.py 產的，
   1200×630（各家共通的建議尺寸）。
+
+  **檔名帶版本號，換圖時把數字 +1（og-2 → og-3），不要原地覆蓋。**
+  LINE、Facebook、iMessage 都是拿**圖的網址**當快取的鍵；檔名不變，
+  它們就永遠沒有理由重抓，於是「明明換過了卻又變回舊的」。
+  換一個檔名等於換一個快取的鍵，全世界的抓取器一律當成沒看過的圖。
+  舊檔留在倉庫裡沒關係 —— 已經被分享出去的舊連結還指著它。
 
   **不要加 og:url。** 有些平台會拿它當正規網址，把使用者實際貼的
   ?m=<球局id> 洗掉 —— 那樣點進來就變成「這個連結不完整」，邀請直接
@@ -22,14 +28,15 @@
   球局細節靠 JavaScript 讀網址參數，而抓取器不跑 JavaScript。
   要讓預覽長出「週日 19:00 大安運動中心」得換成有伺服器的動態頁。
 
-  換過圖之後各平台會把舊的快取住 —— 用一個沒分享過的新球局連結測，
-  才看得到新的卡片。
+  換圖之後要驗的話，先直接開圖的網址確認檔案本身是新的，
+  再用一個**沒分享過**的球局連結看卡片 —— 分享過的連結，平台那邊
+  連頁面帶圖一起快取著。
 -->
 <meta property="og:type"        content="website">
 <meta property="og:site_name"   content="Yumi">
 <meta property="og:title"       content="Yumi · 球局邀請">
 <meta property="og:description" content="有球友邀你加入球局！打開 Yumi 看時間、場地與費用，一鍵報名這場羽球局。">
-<meta property="og:image"       content="https://sungyilin.github.io/yumi-link/og.png">
+<meta property="og:image"       content="https://sungyilin.github.io/yumi-link/og-2.png">
 <meta property="og:image:width"  content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt"   content="Yumi —— 有球友邀你加入球局">
@@ -37,7 +44,7 @@
 <meta name="twitter:card"        content="summary_large_image">
 <meta name="twitter:title"       content="Yumi · 球局邀請">
 <meta name="twitter:description" content="有球友邀你加入球局！打開 Yumi 看時間、場地與費用，一鍵報名這場羽球局。">
-<meta name="twitter:image"       content="https://sungyilin.github.io/yumi-link/og.png">
+<meta name="twitter:image"       content="https://sungyilin.github.io/yumi-link/og-2.png">
 <!--
   分享球局的落地頁。
 
