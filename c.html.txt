@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Yumi · 球團邀請</title>
+<meta name="description" content="有球友邀你加入球團！打開 Yumi 看球團介紹與球局，申請加入一起打球。">
+
+<!--
+  連結預覽（Open Graph）—— 貼到 IG、LINE、Facebook 時對方看到的卡片。
+
+  **圖檔要跟這一頁放在同一個資料夾**（同一個 GitHub Pages 倉庫）。
+  網址一定要寫**完整的絕對路徑** —— 抓取器不會自己補網域，寫成
+  "og-2.png" 的話卡片就沒有圖。圖是 tools/make_og_image.py 產的，
+  1200×630（各家共通的建議尺寸）。
+
+  **檔名帶版本號，換圖時把數字 +1（og-2 → og-3），不要原地覆蓋。**
+  LINE、Facebook、iMessage 都是拿**圖的網址**當快取的鍵；檔名不變，
+  它們就永遠沒有理由重抓，於是「明明換過了卻又變回舊的」。
+  換一個檔名等於換一個快取的鍵，全世界的抓取器一律當成沒看過的圖。
+  舊檔留在倉庫裡沒關係 —— 已經被分享出去的舊連結還指著它。
+
+  **不要加 og:url。** 有些平台會拿它當正規網址，把使用者實際貼的
+  ?c=<球團id> 洗掉 —— 那樣點進來就變成「這個連結不完整」，邀請直接
+  失效。這裡刻意留空，讓平台用使用者貼的那個網址。
+
+  預覽內容是**所有球局共用的**，不帶時間場地：這一頁是純靜態的，
+  球局細節靠 JavaScript 讀網址參數，而抓取器不跑 JavaScript。
+  要讓預覽長出「週日 19:00 大安運動中心」得換成有伺服器的動態頁。
+
+  換圖之後要驗的話，先直接開圖的網址確認檔案本身是新的，
+  再用一個**沒分享過**的球局連結看卡片 —— 分享過的連結，平台那邊
+  連頁面帶圖一起快取著。
+-->
+<meta property="og:type"        content="website">
+<meta property="og:site_name"   content="Yumi">
+<meta property="og:title"       content="Yumi · 球團邀請">
+<meta property="og:description" content="有球友邀你加入球團！打開 Yumi 看球團介紹與球局，申請加入一起打球。">
+<meta property="og:image"       content="https://sungyilin.github.io/yumi-link/og-2.png">
+<meta property="og:image:width"  content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt"   content="Yumi —— 有球友邀你加入球團">
+<meta property="og:locale"      content="zh_TW">
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:title"       content="Yumi · 球團邀請">
+<meta name="twitter:description" content="有球友邀你加入球團！打開 Yumi 看球團介紹與球局，申請加入一起打球。">
+<meta name="twitter:image"       content="https://sungyilin.github.io/yumi-link/og-2.png">
+<!--
+  球團邀請的落地頁（跟 m.html 同一套，只換參數與文案）。
+
+  運作方式：
+    · App 分享出去的連結長這樣：<這一頁的網址>?c=<球團id>
+    · 按「用 Yumi 開啟」→ 試著開 yumi://club/<id>（App 的深連結）
+    · 1.6 秒後人還在這一頁（= 沒有 App 接手）→ 亮出「先下載」的提示，
+      按「前往下載」導去商店（iOS → App Store；Android → Play，
+      Android 版還沒上架前顯示「即將上架」）
+
+  這一頁是純靜態的，**放哪個網域都可以**：App 端只有一個 base 常數
+  （Models 的 ClubShare.base）要跟著改。
+
+  ── 要填的兩個常數（就在下面）──
+    APPSTORE_URL：App Store 的完整連結（App Store Connect →
+      App 資訊 → 「檢視 App Store」可以複製，長得像
+      https://apps.apple.com/tw/app/yumi/id6740000000）
+    PLAY_URL：Google Play 連結；還沒上架就留空字串
+-->
+<style>
+  :root{
+    --lime:#B7F35C; --ink:#527D14; --text:#14242D; --soft:#5A6B73;
+    --base:#F2F5E4;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  body{
+    font-family:-apple-system,"PingFang TC","Noto Sans TC",sans-serif;
+    background:
+      radial-gradient(120% 90% at 0% 0%,   rgba(245,246,172,.85), transparent 60%),
+      radial-gradient(90% 70% at 100% 100%, rgba(207,226,146,.9), transparent 65%),
+      var(--base);
+    color:var(--text); min-height:100vh; min-height:100dvh;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .card{
+    width:100%; max-width:420px; background:rgba(255,255,255,.82);
+    border:1px solid rgba(255,255,255,.9); border-radius:28px;
+    padding:36px 28px; text-align:center;
+    box-shadow:0 18px 50px rgba(40,60,40,.12);
+    backdrop-filter:blur(14px);
+  }
+  .logo{
+    display:inline-block; background:var(--lime); color:var(--text);
+    font-weight:900; font-size:30px; letter-spacing:1px;
+    padding:10px 26px; border-radius:20px; margin-bottom:18px;
+  }
+  h1{ font-size:21px; margin-bottom:8px; }
+  p{ font-size:14px; color:var(--soft); line-height:1.7; }
+  .btn{
+    display:block; width:100%; border:0; cursor:pointer;
+    background:linear-gradient(180deg,#C9F97E,var(--lime));
+    color:var(--text); font-size:17px; font-weight:800;
+    padding:15px 0; border-radius:15px; margin-top:22px;
+    box-shadow:0 6px 18px rgba(140,200,60,.35);
+  }
+  .btn:active{ transform:scale(.98); }
+  .hint{ font-size:12px; color:var(--soft); margin-top:12px; }
+  /* 沒有 App 的提示：一開始藏著，開 App 失敗才亮出來 */
+  #noapp{ display:none; margin-top:26px; padding-top:20px;
+          border-top:1px solid rgba(90,107,115,.2); }
+  #noapp .q{ font-size:15px; font-weight:700; color:var(--text); }
+  .btn.ghost{
+    background:rgba(20,36,45,.06); box-shadow:none; font-weight:700;
+    color:var(--ink);
+  }
+  #badlink{ display:none; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">Yumi</div>
+
+  <div id="main">
+    <h1>有球友邀你加入球團！</h1>
+    <p>打開 Yumi 看球團介紹與球局，<br>申請加入一起打球。</p>
+    <button class="btn" id="open">用 Yumi 開啟</button>
+    <div class="hint">已安裝 Yumi 的話會直接開啟球團頁面</div>
+
+    <div id="noapp">
+      <div class="q">看起來這台手機還沒安裝 Yumi</div>
+      <p style="margin-top:6px">要先下載 App 才能查看與加入球團。</p>
+      <button class="btn" id="store">確認，前往下載</button>
+      <button class="btn ghost" id="retry">我裝了，再開一次</button>
+    </div>
+  </div>
+
+  <div id="badlink">
+    <h1>這個連結不完整</h1>
+    <p>請向分享給你的球友要一次完整的連結。</p>
+  </div>
+</div>
+
+<script>
+  // ── 要填的兩個常數（見上面的說明）──
+  var APPSTORE_URL = "https://apps.apple.com/tw/app/yumi-badminton/id6799363645";
+  var PLAY_URL     = "";   // Android 上架後填；空字串 = 顯示「即將上架」
+
+  var id = new URLSearchParams(location.search).get("c") || "";
+  // 球團 id 一定是 UUID —— 不是就當連結壞掉，也順便擋掉奇怪的注入
+  var UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!UUID_RE.test(id)) {
+    document.getElementById("main").style.display = "none";
+    document.getElementById("badlink").style.display = "block";
+  }
+
+  var deep = "yumi://club/" + id;
+  var timer = null;
+
+  function tryOpen(){
+    document.getElementById("noapp").style.display = "none";
+    location.href = deep;
+    clearTimeout(timer);
+    // 1.6 秒後這一頁還醒著 → 沒有 App 接手，亮出下載提示。
+    // 有接手的話瀏覽器會被切到背景，timeout 到時 hidden 是 true。
+    timer = setTimeout(function(){
+      if (!document.hidden) document.getElementById("noapp").style.display = "block";
+    }, 1600);
+  }
+
+  function goStore(){
+    var isAndroid = /android/i.test(navigator.userAgent);
+    if (isAndroid) {
+      if (PLAY_URL) location.href = PLAY_URL;
+      else alert("Android 版即將上架，敬請期待！\n目前可先用 iPhone 下載 Yumi。");
+    } else {
+      if (APPSTORE_URL) location.href = APPSTORE_URL;
+      else alert("下載連結還沒設定好，請稍後再試。");
+    }
+  }
+
+  document.getElementById("open").addEventListener("click", tryOpen);
+  document.getElementById("retry").addEventListener("click", tryOpen);
+  document.getElementById("store").addEventListener("click", goStore);
+</script>
+</body>
+</html>
