@@ -51,9 +51,9 @@
   運作方式：
     · App 分享出去的連結長這樣：<這一頁的網址>?c=<球團id>
     · 按「用 Yumi 開啟」→ 試著開 yumi://club/<id>（App 的深連結）
-    · 1.6 秒後人還在這一頁（= 沒有 App 接手）→ 亮出「先下載」的提示，
-      按「前往下載」導去商店（iOS → App Store；Android → Play，
-      Android 版還沒上架前顯示「即將上架」）
+    · Android 的 Chrome 走 intent://：有裝就開 App，沒裝立刻跳 Google Play
+    · 其他情況 1.6 秒後人還在這一頁（= 沒有 App 接手）→ 亮出「先下載」的提示，
+      再 1.2 秒沒動靜就自動帶去商店（iPhone → App Store；Android → Google Play）
 
   這一頁是純靜態的，**放哪個網域都可以**：App 端只有一個 base 常數
   （Models 的 ClubShare.base）要跟著改。
@@ -62,7 +62,7 @@
     APPSTORE_URL：App Store 的完整連結（App Store Connect →
       App 資訊 → 「檢視 App Store」可以複製，長得像
       https://apps.apple.com/tw/app/yumi/id6740000000）
-    PLAY_URL：Google Play 連結；還沒上架就留空字串
+    PLAY_URL：Google Play 連結
 -->
 <style>
   :root{
@@ -140,7 +140,7 @@
 <script>
   // ── 要填的兩個常數（見上面的說明）──
   var APPSTORE_URL = "https://apps.apple.com/tw/app/yumi-badminton/id6799363645";
-  var PLAY_URL     = "";   // Android 上架後填；空字串 = 顯示「即將上架」
+  var PLAY_URL     = "https://play.google.com/store/apps/details?id=com.jostephen.yumi";
 
   var id = new URLSearchParams(location.search).get("c") || "";
   // 球團 id 一定是 UUID —— 不是就當連結壞掉，也順便擋掉奇怪的注入
@@ -153,19 +153,34 @@
   var deep = "yumi://club/" + id;
   var timer = null;
 
+  var isAndroid = /android/i.test(navigator.userAgent);
+  var storeURL  = isAndroid ? PLAY_URL : APPSTORE_URL;
+
   function tryOpen(){
     document.getElementById("noapp").style.display = "none";
-    location.href = deep;
     clearTimeout(timer);
-    // 1.6 秒後這一頁還醒著 → 沒有 App 接手，亮出下載提示。
-    // 有接手的話瀏覽器會被切到背景，timeout 到時 hidden 是 true。
+    // Android 的 Chrome 認得 intent:// —— 有裝 App 就開，沒裝就**立刻**照
+    // browser_fallback_url 跳去 Play，不用等計時。其他瀏覽器（LINE 內建等）
+    // 不認得的話會走下面的計時後備。
+    if (isAndroid && PLAY_URL) {
+      location.href = "intent://club/" + id + "#Intent;scheme=yumi;package=com.jostephen.yumi;"
+        + "S.browser_fallback_url=" + encodeURIComponent(PLAY_URL) + ";end";
+    } else {
+      location.href = deep;
+    }
+    // 1.6 秒後這一頁還醒著 → 沒有 App 接手：亮出下載提示，再過 1.2 秒
+    // 人還在就直接帶去商店（iPhone → App Store、Android → Google Play）。
+    // 有接手的話瀏覽器會被切到背景，hidden 是 true，什麼都不做。
     timer = setTimeout(function(){
-      if (!document.hidden) document.getElementById("noapp").style.display = "block";
+      if (document.hidden) return;
+      document.getElementById("noapp").style.display = "block";
+      setTimeout(function(){
+        if (!document.hidden && storeURL) location.href = storeURL;
+      }, 1200);
     }, 1600);
   }
 
   function goStore(){
-    var isAndroid = /android/i.test(navigator.userAgent);
     if (isAndroid) {
       if (PLAY_URL) location.href = PLAY_URL;
       else alert("Android 版即將上架，敬請期待！\n目前可先用 iPhone 下載 Yumi。");
